@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3 uid="uid://dh4ip7jlh1u10"]
+
+[ext_resource type="Script" uid="uid://bl67we1xnsaoj" path="res://addons/dtag.daylily-zeleen/editor/dtag_selector.gd" id="1_0h4eb"]
+
+[node name="DtagSelector" type="ConfirmationDialog" node_paths=PackedStringArray("_search_line_edit", "_selected_label", "_tree")]
+oversampling_override = 1.0
+title = "Select DTag"
+position = Vector2i(0, 36)
+size = Vector2i(650, 450)
+dialog_hide_on_ok = false
+script = ExtResource("1_0h4eb")
+_search_line_edit = NodePath("PanelContainer/VBoxContainer/SearchLineEdit")
+_selected_label = NodePath("PanelContainer/VBoxContainer/SelectedLabel")
+_tree = NodePath("PanelContainer/VBoxContainer/Tree")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="SearchLineEdit" type="LineEdit" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Search..."
+clear_button_enabled = true
+
+[node name="SelectedLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "asd"
+text_overrun_behavior = 1
+
+[node name="Tree" type="Tree" parent="PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+hide_root = true
