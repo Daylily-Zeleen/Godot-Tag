@@ -1,7 +1,7 @@
 @tool
 extends EditorScript
 
-var gen_target_file := "res://dtag.gen.gd"
+var gen_target_file := "res://dtag_def.gen.gd"
 
 
 func _run() -> void:
@@ -16,7 +16,7 @@ func _run() -> void:
 	# Generate
 	var identifiers: PackedStringArray
 	var text := "# NOTE: This file is generated, any modify maybe discard.\n"
-	text += "class_name DTag\n\n"
+	text += "class_name DTagDef\n\n"
 	for tag_namespace in tag_definitions:
 		text += "\n"
 		text += "const %s = {\n" % tag_namespace
@@ -27,7 +27,7 @@ func _run() -> void:
 	var global_class_list := ProjectSettings.get_global_class_list().map(func(c: Dictionary) -> String: return c.class )
 	for identifier in identifiers:
 		if class_list.has(identifier) or global_class_list.has(identifier):
-			print_rich("[color=yellow][WARN] DTag: tag \"%s\" is a class name.[/color]")
+			print_rich("[color=yellow][WARN] DTag: tag \"%s\" is a class name.[/color]" % identifier)
 
 	var fa := FileAccess.open(gen_target_file, FileAccess.WRITE)
 	if not is_instance_valid(fa):
