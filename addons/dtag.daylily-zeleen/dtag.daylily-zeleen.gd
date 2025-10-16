@@ -12,13 +12,14 @@ class EditorInspectorPluginTag extends EditorInspectorPlugin:
 		return true
 
 	func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: PropertyUsageFlags, wide: bool) -> bool:
-		const TAG_EDIT_PREFIX := "DTagEdit:"
+		const TAG_EDIT_PREFIX := "DTagEdit"
 		const TAG_DOMAIN_EDIT_PREFIX := "DTagDomainEdit"
 		var select_tag := hint_string.begins_with(TAG_EDIT_PREFIX)
 		var select_domain := hint_string.begins_with(TAG_DOMAIN_EDIT_PREFIX)
 		if type in [TYPE_STRING, TYPE_STRING_NAME, TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
 			if select_tag:
-				var domain := hint_string.trim_prefix(TAG_EDIT_PREFIX).strip_edges(true).split(".", false)
+				var splits := hint_string.split(":", false, 1)
+				var domain := splits[1].strip_edges(true).split(".", false) if splits.size() == 0 else []
 				var prop_edit := preload("editor/edit_property_dtag.gd").new()
 				prop_edit.setup(domain, true, _selector)
 				add_property_editor(name, prop_edit)

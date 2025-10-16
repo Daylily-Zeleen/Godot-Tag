@@ -24,7 +24,7 @@ func _get_property_list() -> Array[Dictionary]:
 			name = TAG_ALAIS,
 			type = TYPE_STRING_NAME,
 			hint = PROPERTY_HINT_NONE,
-			hint_string = "DTagEdit: " + ".".join(domain),
+			hint_string = "DTagEdit" if domain.is_empty() else ("DTagEdit: " + ".".join(domain)),
 			usage = PROPERTY_USAGE_EDITOR,
 		},
 	]
