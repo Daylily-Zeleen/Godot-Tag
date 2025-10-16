@@ -1,19 +1,26 @@
 @tool
 extends ConfirmationDialog
 
-signal selected(tag_or_scopes :StringName, confirm: bool)
+signal selected(tag_or_domain :StringName, confirm: bool)
 
 @export_group("_internal_", "_")
 @export var _search_line_edit: LineEdit
 @export var _selected_label: Label
+@export var _domain_limitation_label: Label
 @export var _tree: Tree
 
 var _selected: StringName = &"":
 	set(v):
 		_selected = v
 		_selected_label.text = _selected
+		_selected_label.tooltip_text = _selected
 		get_ok_button().disabled = _selected.is_empty()
-var _scopes_limitation: StringName
+var _domain_limitation: StringName:
+	set(v):
+		_domain_limitation = v
+		_domain_limitation_label.text = _domain_limitation
+		_domain_limitation_label.tooltip_text = _domain_limitation
+		_domain_limitation_label.get_parent().visible = not v.is_empty()
 var _select_tag:bool
 
 var _leaves_item:Array[TreeItem]
@@ -27,16 +34,18 @@ func _ready() -> void:
 	_tree.item_selected.connect(_on_tree_item_selected)
 
 
-func setup(tag: StringName, scopes: PackedStringArray, select_tag: bool) -> void:
+func setup(tag: StringName, domain: PackedStringArray, select_tag: bool) -> void:
+	_domain_limitation = (".".join(domain) + ".") if not domain.is_empty() else ""
+	_select_tag = select_tag
 	if select_tag:
 		_selected = tag
 		title = "Select DTag"
+		if not _domain_limitation.is_empty():
+			title += ": " + _domain_limitation
 	else:
-		_selected = ".".join(scopes)
-		title = "Select DTag Scope"
+		_selected = ".".join(domain)
+		title = "Select DTag Domain"
 
-	_scopes_limitation = (".".join(scopes) + ".") if not scopes.is_empty() else ""
-	_select_tag = select_tag
 
 	_leaves_item.clear()
 	_tree.clear()
@@ -59,7 +68,7 @@ func setup(tag: StringName, scopes: PackedStringArray, select_tag: bool) -> void
 			if not def is Dictionary:
 				continue
 
-			if not _scopes_limitation.is_empty() and not _scopes_limitation.begins_with(k + "."):
+			if not _domain_limitation.is_empty() and not _domain_limitation.begins_with(k + "."):
 				# 过滤命名空间限制
 				continue
 
@@ -68,17 +77,20 @@ func setup(tag: StringName, scopes: PackedStringArray, select_tag: bool) -> void
 			item.set_metadata(0, k)
 			item.set_tooltip_text(0, k)
 			_setup_item_recursively(item, def)
+			if _select_tag:
+				item.set_selectable(0, false)
+				item.set_custom_color(0, Color.DIM_GRAY)
 
 	_on_search_text_changed(_search_line_edit.text)
 	popup_centered_ratio(0.6)
 
 
 func _setup_item_recursively(parent: TreeItem, def: Dictionary) -> void:
-	var prev_scopes := parent.get_metadata(0) as String
+	var prev_domain := parent.get_metadata(0) as String
 	for k: String in def:
 		var next_def :Variant = def[k]
-		var tag := prev_scopes + "." + k
-		if not _scopes_limitation.is_empty() and not _scopes_limitation.begins_with(tag + "."):
+		var tag := prev_domain + "." + k
+		if not _domain_limitation.is_empty() and (not _domain_limitation.begins_with(tag + ".") and not tag.begins_with(_domain_limitation)):
 			# 过滤命名空间限制
 			continue
 
@@ -91,9 +103,11 @@ func _setup_item_recursively(parent: TreeItem, def: Dictionary) -> void:
 			_setup_item_recursively(item, next_def)
 			if _select_tag:
 				item.set_selectable(0, false)
+				item.set_custom_color(0, Color.DIM_GRAY)
 		else:
 			if not _select_tag:
 				item.set_selectable(0, false)
+				item.set_custom_color(0, Color.DIM_GRAY)
 
 		if item.get_child_count() <= 0:
 			_leaves_item.push_back(item)
@@ -135,6 +149,9 @@ func _on_confirmed() -> void:
 
 
 func _on_tree_item_activated() -> void:
+	var selected_item := _tree.get_selected()
+	if not is_instance_valid(selected_item) or not selected_item.is_selectable(0):
+		return
 	selected.emit(_selected, true)
 	hide()
 

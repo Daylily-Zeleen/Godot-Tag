@@ -1,7 +1,7 @@
 @tool
 extends EditorProperty
 
-var _scopes :PackedStringArray
+var _domain :PackedStringArray
 
 var _tag_button := Button.new()
 
@@ -9,14 +9,24 @@ var _select_tag: bool
 var _selector: Window
 
 func _init() -> void:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	add_child(hbox)
+
 	_tag_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tag_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_CHAR
 	_tag_button.pressed.connect(_on_tag_button_pressed)
-	add_child(_tag_button)
+	hbox.add_child(_tag_button)
+
+	var clear_btn := Button.new()
+	clear_btn.icon = EditorInterface.get_base_control().get_theme_icon("clear", &"LineEdit")
+	clear_btn.tooltip_text = "Clear"
+	clear_btn.pressed.connect(_on_clear_btn_pressed)
+	hbox.add_child(clear_btn)
 
 
-func setup(scopes: PackedStringArray, select_tag: bool, selector: Window) -> void:
-	_scopes = scopes
+func setup(domain: PackedStringArray, select_tag: bool, selector: Window) -> void:
+	_domain = domain
 	_select_tag = select_tag
 	_selector = selector
 
@@ -35,8 +45,10 @@ func _update_property() -> void:
 	elif v is Array or v is PackedStringArray:
 		_tag_button.text = ".".join(v)
 
-	_tag_button.tooltip_text = _tag_button.text
-	printerr(_tag_button.text)
+	if _select_tag:
+		_tag_button.tooltip_text = "DTag: " + _tag_button.text
+	else:
+		_tag_button.tooltip_text = "DTag Domain: " + _tag_button.text
 
 
 func _on_tag_button_pressed() -> void:
@@ -45,9 +57,9 @@ func _on_tag_button_pressed() -> void:
 	var v := obj.get(prop)
 
 	if typeof(v) in [TYPE_STRING, TYPE_STRING_NAME]:
-		_selector.setup(v, [], _select_tag)
+		_selector.setup(v, _domain, _select_tag)
 	elif typeof(v) in [TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
-		_selector.setup(&"", _scopes, _select_tag)
+		_selector.setup(&"", _domain, _select_tag)
 	else:
 		assert(false)
 		return
@@ -57,7 +69,24 @@ func _on_tag_button_pressed() -> void:
 	var confirm := result[1] as bool
 
 	if confirm:
-		if typeof(v) in [TYPE_STRING, TYPE_STRING_NAME]:
-			emit_changed(prop, selected)
-		else:
-			emit_changed(prop, selected.split(".", false))
+		match typeof(v):
+			TYPE_STRING, TYPE_STRING_NAME:
+				emit_changed(prop, selected)
+			TYPE_ARRAY:
+				var domain :Array = selected.split(".", false)
+				emit_changed(prop, Array(domain, TYPE_STRING_NAME, &"", null))
+			TYPE_PACKED_STRING_ARRAY:
+				emit_changed(prop, selected.split(".", false))
+
+
+func _on_clear_btn_pressed() -> void:
+	var obj := get_edited_object()
+	var prop := get_edited_property()
+	var v := obj.get(prop)
+	match typeof(v):
+		TYPE_STRING, TYPE_STRING_NAME:
+			emit_changed(prop, &"")
+		TYPE_ARRAY:
+			emit_changed(prop, Array([], TYPE_STRING_NAME, &"", null))
+		TYPE_PACKED_STRING_ARRAY:
+			emit_changed(prop, PackedStringArray())

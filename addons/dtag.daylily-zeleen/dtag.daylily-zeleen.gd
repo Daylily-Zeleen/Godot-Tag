@@ -13,14 +13,19 @@ class EditorInspectorPluginTag extends EditorInspectorPlugin:
 
 	func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: PropertyUsageFlags, wide: bool) -> bool:
 		const TAG_EDIT_PREFIX := "DTagEdit:"
-		const TAG_SCOPE_EDIT_PREFIX := "DTagScopesEdit"
+		const TAG_DOMAIN_EDIT_PREFIX := "DTagDomainEdit"
 		var select_tag := hint_string.begins_with(TAG_EDIT_PREFIX)
-		var select_scope := hint_string.begins_with(TAG_SCOPE_EDIT_PREFIX)
-		if type in [TYPE_STRING, TYPE_STRING_NAME]:
-			if hint_string.begins_with(TAG_EDIT_PREFIX):
-				var scopes := hint_string.trim_prefix(TAG_EDIT_PREFIX).split(".", false)
-				var prop_edit := preload("res://addons/dtag.daylily-zeleen/editor/edit_property_dtag.gd").new()
-				prop_edit.setup(scopes, true, _selector)
+		var select_domain := hint_string.begins_with(TAG_DOMAIN_EDIT_PREFIX)
+		if type in [TYPE_STRING, TYPE_STRING_NAME, TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
+			if select_tag:
+				var domain := hint_string.trim_prefix(TAG_EDIT_PREFIX).strip_edges(true).split(".", false)
+				var prop_edit := preload("editor/edit_property_dtag.gd").new()
+				prop_edit.setup(domain, true, _selector)
+				add_property_editor(name, prop_edit)
+				return true
+			elif select_domain:
+				var prop_edit := preload("editor/edit_property_dtag.gd").new()
+				prop_edit.setup([], false, _selector)
 				add_property_editor(name, prop_edit)
 				return true
 		return false
@@ -29,12 +34,21 @@ var _selector :Window
 var _inspector_plugin : EditorInspectorPluginTag
 
 func _enter_tree() -> void:
-	_selector = preload("res://addons/dtag.daylily-zeleen/editor/dtag_selector.tscn").instantiate()
+	_selector = preload("editor/dtag_selector.tscn").instantiate()
 	add_child(_selector)
 	
 	_inspector_plugin = EditorInspectorPluginTag.new(_selector)
 	add_inspector_plugin(_inspector_plugin)
 
+	add_tool_menu_item("Generate dtag_def.gen.gd", _on_generate_dtag_def_gen_requested)
+
 
 func _exit_tree() -> void:
 	remove_inspector_plugin(_inspector_plugin)
+
+	remove_tool_menu_item("Generate dtag_def.gen.gd")
+
+
+func _on_generate_dtag_def_gen_requested() -> void:
+	var tool := preload("tool/tool_generate_dtag.gd").new() as EditorScript
+	tool._run()

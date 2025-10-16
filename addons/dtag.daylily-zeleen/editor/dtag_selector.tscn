@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bl67we1xnsaoj" path="res://addons/dtag.daylily-zeleen/editor/dtag_selector.gd" id="1_0h4eb"]
 
-[node name="DtagSelector" type="ConfirmationDialog" node_paths=PackedStringArray("_search_line_edit", "_selected_label", "_tree")]
+[node name="DtagSelector" type="ConfirmationDialog" node_paths=PackedStringArray("_search_line_edit", "_selected_label", "_domain_limitation_label", "_tree")]
 oversampling_override = 1.0
 title = "Select DTag"
 position = Vector2i(0, 36)
@@ -10,7 +10,8 @@ size = Vector2i(650, 450)
 dialog_hide_on_ok = false
 script = ExtResource("1_0h4eb")
 _search_line_edit = NodePath("PanelContainer/VBoxContainer/SearchLineEdit")
-_selected_label = NodePath("PanelContainer/VBoxContainer/SelectedLabel")
+_selected_label = NodePath("PanelContainer/VBoxContainer/HBoxContainer/SelectedLabel")
+_domain_limitation_label = NodePath("PanelContainer/VBoxContainer/HBoxContainer2/DomainLimitationLabel")
 _tree = NodePath("PanelContainer/VBoxContainer/Tree")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
@@ -19,8 +20,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -49.0
+offset_right = 642.0
+offset_bottom = 401.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -35,9 +36,33 @@ layout_mode = 2
 placeholder_text = "Search..."
 clear_button_enabled = true
 
-[node name="SelectedLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6542321, 0.6542321, 0.654232, 1)
+text = "Current: "
+
+[node name="SelectedLabel" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+text = "asd"
+text_overrun_behavior = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6542321, 0.6542321, 0.654232, 1)
+text = "Domain Limitation: "
+
+[node name="DomainLimitationLabel" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 text = "asd"
 text_overrun_behavior = 1
 

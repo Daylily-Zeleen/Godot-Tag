@@ -3,71 +3,66 @@
 class_name DTag
 extends Resource
 
-var scopes: Array[StringName]
-var tag :StringName
+## Tag Domain, use as limitation.
+@export_custom(PROPERTY_HINT_NONE, "DTagDomainEdit") var domain: Array[StringName]:
+	set(v):
+		domain = v
+		if Engine.is_editor_hint() and not value.is_empty():
+			if not is_domain_compatible(value):
+				print_rich("[color=yellow][WARN] DTag: \"%s\" tag is incompatible with domain \"%s\", will be reset to &\"\".[/color]" % [value, ".".join(domain)])
+				value = &""
+		notify_property_list_changed()
+## Tag actual value.
+@export_storage var value :StringName = &""
+
+const TAG_ALAIS := &"tag"
 
 
 func _get_property_list() -> Array[Dictionary]:
 	var ret :Array[Dictionary] = [
 		{
-			name = &"tag",
+			name = TAG_ALAIS,
 			type = TYPE_STRING_NAME,
 			hint = PROPERTY_HINT_NONE,
-			hint_string = "DTagEdit:" % ".".join(scopes),
-			usage = PROPERTY_USAGE_DEFAULT,
+			hint_string = "DTagEdit: " + ".".join(domain),
+			usage = PROPERTY_USAGE_EDITOR,
 		},
-		{
-			name = &"scopes",
-			type = TYPE_ARRAY,
-			hint = PROPERTY_HINT_NONE,
-			hint_string = "DTagScopesEdit",
-			usage = PROPERTY_USAGE_DEFAULT,
-		}
 	]
 	return ret
 
 
 func _get(property: StringName) -> Variant:
 	match property:
-		&"scopes":
-			return scopes
-		&"tag":
-			return tag
+		TAG_ALAIS:
+			return value
 		_:
 			return null
 
 
-func _set(property: StringName, value: Variant) -> bool:
+func _set(property: StringName, p_value: Variant) -> bool:
 	match property:
-		&"tag":
-			if scopes.is_empty():
-				tag = value
-				scopes = Array(tag.split(".", false), TYPE_STRING_NAME, &"", null)
+		TAG_ALAIS:
+			if domain.is_empty():
+				value = p_value
+				domain.assign(value.split(".", false))
+				domain.pop_back()
 				notify_property_list_changed()
 			else:
 				if Engine.is_editor_hint():
 					# Validate in editor
-					var splits := value.split(".", false) as PackedStringArray
+					var splits := p_value.split(".", false) as PackedStringArray
 					var valid := true
-					for i in range(mini(scopes.size(), splits.size())):
-						if scopes[i] != splits[i]:
+					for i in range(mini(domain.size(), splits.size())):
+						if domain[i] != splits[i]:
 							valid = false
 							break
 
 					if valid:
-						tag = value
+						value = p_value
 						notify_property_list_changed()
 				else:
-					tag = value
+					value = p_value
 
-			return true
-		&"scopes":
-			scopes = value
-			if Engine.is_editor_hint() and not tag.is_empty():
-				if not is_scopes_match(tag):
-					print_rich("[color=yellow][WARN] DTag: \"%s\" tag is incompatible with scopes \"%s\", will be reset to &\"\".[/color]" % [tag, ".".join(scopes)])
-					tag = &""
-			notify_property_list_changed()
 			return true
 		_:
 			return false
@@ -76,37 +71,41 @@ func _set(property: StringName, value: Variant) -> bool:
 func is_equal(other_tag: Variant) -> bool:
 	assert(other_tag is DTag or other_tag is StringName)
 	if other_tag is DTag:
-		return tag == other_tag.tag
+		return value == other_tag.value
 	elif other_tag is StringName or other_tag is String:
-		return tag == other_tag
+		return value == other_tag
 
-	assert(false, "Unrecognize type")
+	assert(false, "Unrecognized type")
 	return false
 
 
-func is_scopes_match(other_scopes: Variant) -> bool:
-	if other_scopes is DTag:
-		for i in range(mini(other_scopes.scopes.size(), scopes.size())):
-			if other_scopes.scopes[i] != scopes[i]:
+func is_domain_compatible(other_domain: Variant) -> bool:
+	if domain.is_empty():
+		return true
+
+	if other_domain is DTag:
+		for i in range(mini(other_domain.domain.size(), domain.size())):
+			if other_domain.domain[i] != domain[i]:
 				return false
 		return true
-	elif other_scopes is StringName or other_scopes is String:
-		var splits := other_scopes.split(".", false) as PackedStringArray
-		for i in range(mini(splits.size(), scopes.size())):
-			if splits[i] != scopes[i]:
+	elif other_domain is StringName or other_domain is String:
+		var splits := other_domain.split(".", false) as PackedStringArray
+		for i in range(mini(splits.size(), domain.size())):
+			if splits[i] != domain[i]:
 				return false
 		return true
-	elif typeof(other_scopes) >= TYPE_ARRAY:
-		for i in range(mini(other_scopes.size(), scopes.size())):
-			if other_scopes[i] != scopes[i]:
+	elif typeof(other_domain) >= TYPE_ARRAY:
+		for i in range(mini(other_domain.size(), domain.size())):
+			if other_domain[i] != domain[i]:
 				return false
 		return true
 
-	assert(false, "Unrecognize type")
+	assert(false, "Unrecognized type")
 	return false
 
 
 static var _tag_cache: Dictionary[StringName, DTag]
+## Create tag from StringName with caching.
 static func from(p_tag: StringName) -> DTag:
 	if Engine.is_editor_hint():
 		var ret := DTag.new()
@@ -121,16 +120,17 @@ static func from(p_tag: StringName) -> DTag:
 		return ret
 
 
-static var _scopes_cache: Dictionary[StringName, DTag]
-static func as_scopes(p_scopes: StringName) -> DTag:
+static var _domain_cache: Dictionary[StringName, DTag]
+## Create tag domain from StringName with caching.
+static func as_domain(p_domain: StringName) -> DTag:
 	if Engine.is_editor_hint():
 		var ret := DTag.new()
-		ret.scopes = p_scopes.split(".", false)
+		ret.domain = p_domain.split(".", false)
 		return ret
 	else:
-		if _scopes_cache.has(p_scopes):
-			return _scopes_cache.get(p_scopes)
+		if _domain_cache.has(p_domain):
+			return _domain_cache.get(p_domain)
 		var ret := DTag.new()
-		ret.scopes = p_scopes.split(".", false)
-		_scopes_cache[p_scopes] = ret
+		ret.domain = p_domain.split(".", false)
+		_domain_cache[p_domain] = ret
 		return ret
