@@ -10,7 +10,7 @@ func _run() -> void:
 	var gd_script_files := _get_gd_scripts_recursively()
 	var tag_definitions: Dictionary[String, Dictionary] = {}
 	for f in gd_script_files:
-		var script := ResourceLoader.load(f, "GDScript", ResourceLoader.CACHE_MODE_IGNORE) as Script
+		var script := ResourceLoader.load(f, "GDScript", ResourceLoader.CACHE_MODE_IGNORE_DEEP) as Script
 		_extract_tag_definitions(script, processed_scripts, tag_definitions)
 
 	# Generate
@@ -24,7 +24,7 @@ func _run() -> void:
 		text += "}\n"
 
 	var class_list := ClassDB.get_class_list()
-	var global_class_list := ProjectSettings.get_global_class_list().map(func(c: Dictionary) -> String: return c.class )
+	var global_class_list := ProjectSettings.get_global_class_list().map(func(c: Dictionary) -> String: return c.class)
 	for identifier in identifiers:
 		if class_list.has(identifier) or global_class_list.has(identifier):
 			print_rich("[color=yellow][WARN] DTag: tag \"%s\" is a class name.[/color]" % identifier)
@@ -37,7 +37,18 @@ func _run() -> void:
 	fa.store_string(text)
 	fa.close()
 
-	EditorInterface.get_resource_filesystem().update_file(gen_target_file)
+	var opened_scripts := EditorInterface.get_script_editor().get_open_scripts()
+	for i in range(opened_scripts.size()):
+		var script := opened_scripts[i] as Script
+		if script.resource_path == gen_target_file:
+			var se := EditorInterface.get_script_editor().get_open_script_editors().get(i) as ScriptEditorBase
+			if is_instance_valid(se):
+				var te := se.get_base_editor() as CodeEdit
+				if is_instance_valid(te):
+					te.text = text
+					te.tag_saved_version()
+			break
+
 	print("DTag: \"%s\" is generated." % [gen_target_file])
 
 
@@ -69,7 +80,7 @@ func _get_gd_scripts_recursively(base_dir := "res://", r_files: PackedStringArra
 # Return value format example: {
 # 	Namespace1 = {
 # 		Namespace2 = {
-# 			A = "xxx", # Comment
+# 			A = "xxx",
 # 		}
 # 		B = "xxx",
 # 		C = "",
@@ -82,6 +93,9 @@ func _extract_tag_definitions(script: GDScript, processed_scripts: Array[Script]
 	if processed_scripts.has(script):
 		return r_tag_definitions
 
+	if script.get_base_script() != (DTagDefinition as Script):
+		return r_tag_definitions
+
 	processed_scripts.push_back(script)
 	
 	var constant_map := script.get_script_constant_map()
@@ -91,7 +105,7 @@ func _extract_tag_definitions(script: GDScript, processed_scripts: Array[Script]
 			continue
 		var v: Variant = constant_map.get(k, null)
 		if v is Script:
-			_extract_tag_definitions(script, processed_scripts, r_tag_definitions)
+			_extract_tag_definitions(v, processed_scripts, r_tag_definitions)
 			continue
 
 		if typeof(v) != TYPE_DICTIONARY:
