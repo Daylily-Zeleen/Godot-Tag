@@ -19,7 +19,7 @@ class EditorInspectorPluginTag extends EditorInspectorPlugin:
 		if type in [TYPE_STRING, TYPE_STRING_NAME, TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
 			if select_tag:
 				var splits := hint_string.split(":", false, 1)
-				var domain := splits[1].strip_edges(true).split(".", false) if splits.size() == 0 else []
+				var domain := [] if splits.size() < 2 else (splits[1].strip_edges(true).split(".", false))
 				var prop_edit := preload("editor/edit_property_dtag.gd").new()
 				prop_edit.setup(domain, true, _selector)
 				add_property_editor(name, prop_edit)
