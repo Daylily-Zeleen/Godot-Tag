@@ -1,5 +1,9 @@
 # Godot - DTag
 
+
+![](icon.svg)
+
+
 DTag, a tool for creating tag like "GameplayTag" in Unreal Engine.
 
 The essence of DTag is `StringName`, this plugin provide tool to generate structured constant `Dictionary`, and provide editor inspector plugin to select **tag** and **tag domain**.
