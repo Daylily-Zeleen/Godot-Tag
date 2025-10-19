@@ -2,20 +2,17 @@
 class_name DTagDef
 
 
-const MainDomain1 = {
-	Domain1 = {
-		## Example tag1
-		Tag1 = &"MainDomain1.Domain1.Tag1",
-		Tag2 = &"MainDomain1.Domain1.Tag2",
-	},
-	Tag3 = &"MainDomain1.Tag3",
-}
-
-const MainDomain2 = {
-	Domain2 = {
-		## Example tag
-		Tag1 = &"MainDomain2.Domain2.Tag1",
-		## Example tag
-		Tag2 = &"MainDomain2.Domain2.Tag2",
+## # Desc
+const MainDomain = {
+	DOMAIN_NAME = &"MainDomain",
+	## # Desc
+	Tag1 = &"Redirect.To.New.Tag",
+	## # Desc
+	Domain = {
+		DOMAIN_NAME = &"Redirect.To.New.Domain",
+		## # Desc
+		Tag2 = &"Redirect.To.New.Domain.Tag2",
+		## # Desc
+		Tag3 = &"Redirect.To.New.Domain.Tag3",
 	},
 }

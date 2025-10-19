@@ -5,6 +5,9 @@ var gen_target_file := "res://dtag_def.gen.gd"
 
 
 func _run() -> void:
+	var script_editor := EditorInterface.get_script_editor()
+	print(script_editor.get_open_script_editors())
+	return 
 	var processed_scripts: Array[Script]
 
 	var gd_script_files := _get_gd_scripts_recursively()
@@ -93,8 +96,8 @@ func _extract_tag_definitions(script: GDScript, processed_scripts: Array[Script]
 	if processed_scripts.has(script):
 		return r_tag_definitions
 
-	if script.get_base_script() != (DTagDefinition as Script):
-		return r_tag_definitions
+	#if script.get_base_script() != (DTagDefinition as Script):
+		#return r_tag_definitions
 
 	processed_scripts.push_back(script)
 	

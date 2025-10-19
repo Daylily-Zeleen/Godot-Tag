@@ -117,7 +117,7 @@ func example() -> void:
 		@export_custom(PROPERTY_HINT_NONE, "DTagEdit: MainDomain1.Domain1") var tag2: StringName
 		```
 
-    - 它还可以与 `Array[StringName]`/`Array[String]` 类型的属性一起工作, 将数组元素在检查器中识别为 Tag:
+	- 它还可以与 `Array[StringName]`/`Array[String]` 类型的属性一起工作, 将数组元素在检查器中识别为 Tag:
 
 		``` GDScript
 		# This will recognize each element as tag in inspector.
@@ -133,9 +133,9 @@ func example() -> void:
 		@export_custom(PROPERTY_HINT_NONE, "DTagDomainEdit") var tag_domain: Array[StringName]
 		```
 
-    - 与 `Array[Array]`/`Array[PackedStringArray]` 类型的属性一起工作，将数组元素在检查器中识别为 Tag Domain:
+	- 与 `Array[Array]`/`Array[PackedStringArray]` 类型的属性一起工作，将数组元素在检查器中识别为 Tag Domain:
 
 		```GDScript
 		# This will recognize each element as tag domain in inspector.
-        @export_custom(PROPERTY_HINT_TYPE_STRING, "%s:DTagDomainEditor" % TYPE_PACKED_STRING_ARRAY) var domain_list :Array[PackedStringArray]
+		@export_custom(PROPERTY_HINT_TYPE_STRING, "%s:DTagDomainEditor" % TYPE_PACKED_STRING_ARRAY) var domain_list :Array[PackedStringArray]
 		```

@@ -33,8 +33,25 @@ class EditorInspectorPluginTag extends EditorInspectorPlugin:
 
 var _selector :Window
 var _inspector_plugin : EditorInspectorPluginTag
+var _highlighter := preload("editor/dtag_syntax_highlighter.gd").new()
+
+const ESETTING_TEXTFILE_EXTENDSIONS := "docks/filesystem/textfile_extensions"
+const OVERRIDE_SETTING_TEXTFILE_EXTENDSIONS := "editor_overrides/docks/filesystem/textfile_extensions"
 
 func _enter_tree() -> void:
+	if not ProjectSettings.has_setting(OVERRIDE_SETTING_TEXTFILE_EXTENDSIONS):
+		ProjectSettings.set_setting(OVERRIDE_SETTING_TEXTFILE_EXTENDSIONS, EditorInterface.get_editor_settings().get_setting(ESETTING_TEXTFILE_EXTENDSIONS))
+
+	var extensions := ProjectSettings.get_setting_with_override(OVERRIDE_SETTING_TEXTFILE_EXTENDSIONS) as String
+	var valid := false
+	for e in extensions.split(","):
+		if e.strip_edges() == "dtag":
+			valid = true
+			break
+	if not valid :
+		extensions += ",dtag"
+	ProjectSettings.set_setting(OVERRIDE_SETTING_TEXTFILE_EXTENDSIONS, extensions)
+	
 	_selector = preload("editor/dtag_selector.tscn").instantiate()
 	add_child(_selector)
 	
@@ -43,11 +60,14 @@ func _enter_tree() -> void:
 
 	add_tool_menu_item("Generate dtag_def.gen.gd", _on_generate_dtag_def_gen_requested)
 
+	EditorInterface.get_script_editor().register_syntax_highlighter(_highlighter)
 
 func _exit_tree() -> void:
 	remove_inspector_plugin(_inspector_plugin)
 
 	remove_tool_menu_item("Generate dtag_def.gen.gd")
+
+	EditorInterface.get_script_editor().unregister_syntax_highlighter(_highlighter)
 
 
 func _on_generate_dtag_def_gen_requested() -> void:
