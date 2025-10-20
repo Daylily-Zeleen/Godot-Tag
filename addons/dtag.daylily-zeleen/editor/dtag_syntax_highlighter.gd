@@ -3,8 +3,8 @@ extends EditorSyntaxHighlighter
 
 var _highlighter := CodeHighlighter.new()
 
-var _horvering_symbol :String
-var _horvering_symbol_tooltip: String
+var _hovering_symbol :String
+var _hovering_symbol_tooltip: String
 var _err_lines :Dictionary[int, String]
 
 const _Parse := preload("parser.gd")
@@ -61,16 +61,15 @@ func _setup_syntax_check() -> void:
 	te.set_tooltip_request_func.call_deferred(_request_symbol_tooltip)
 
 	te.syntax_highlighter = _highlighter
-	(te as CodeEdit).add_comment_delimiter("#", "")
 
 
 func _on_symbol_hovered(symbol: String, line: int, column: int) -> void:
-	_horvering_symbol = symbol
-	_horvering_symbol_tooltip = ""
+	_hovering_symbol = symbol
+	_hovering_symbol_tooltip = ""
 
 	if line in _err_lines:
-		_horvering_symbol_tooltip = _err_lines[line]
-		get_text_edit().tooltip_text = _horvering_symbol_tooltip
+		_hovering_symbol_tooltip = _err_lines[line]
+		get_text_edit().tooltip_text = _hovering_symbol_tooltip
 		return
 
 	get_text_edit().tooltip_text = ""
@@ -86,22 +85,22 @@ func _on_symbol_hovered(symbol: String, line: int, column: int) -> void:
 
 	var redirect_column := line_text.find("->")
 	if redirect_column >= 0 and column > redirect_column:
-		_horvering_symbol_tooltip = "Redirect: " + line_text.split("->", false, 1)[1].split("#", false, 1)[0].strip_edges()
+		_hovering_symbol_tooltip = "Redirect: " + line_text.split("->", false, 1)[1].split("#", false, 1)[0].strip_edges()
 		return
 
 	if line_text.strip_edges().begins_with("@"):
-		_horvering_symbol_tooltip = "Domain: " + symbol
+		_hovering_symbol_tooltip = "Domain: " + symbol
 	else:
-		_horvering_symbol_tooltip = "Tag: " + symbol
+		_hovering_symbol_tooltip = "Tag: " + symbol
 
 
 func _request_symbol_tooltip(hovered_word: String) -> String:
-	if _horvering_symbol_tooltip.begins_with("ERROR"):
-		return _horvering_symbol_tooltip
+	if _hovering_symbol_tooltip.begins_with("ERROR"):
+		return _hovering_symbol_tooltip
 
-	if _horvering_symbol != hovered_word:
+	if _hovering_symbol != hovered_word:
 		return ""
-	return _horvering_symbol_tooltip
+	return _hovering_symbol_tooltip
 
 
 func _get_indent_count(text: String) -> int:
@@ -119,7 +118,7 @@ func _check_syntax() -> void:
 	if err_lines.is_empty():
 		_Parse.parse(te.text, err_lines)
 
-	# Recorver
+	# Recover
 	for line in _err_lines:
 		if not line in err_lines:
 			te.set_line_background_color(line, Color.TRANSPARENT)
@@ -134,13 +133,13 @@ func _check_syntax() -> void:
 		var cl := te.get_line_column_at_pos(mouse_pos)
 		if cl.y in _err_lines:
 			te.tooltip_text = _err_lines[cl.y]
-			_horvering_symbol_tooltip = te.tooltip_text
+			_hovering_symbol_tooltip = te.tooltip_text
 		else:
 			te.tooltip_text = ""
-			if _horvering_symbol.is_empty():
-				_horvering_symbol_tooltip = ""
+			if _hovering_symbol.is_empty():
+				_hovering_symbol_tooltip = ""
 			else:
-				_on_symbol_hovered(_horvering_symbol, cl.y, cl.x)
+				_on_symbol_hovered(_hovering_symbol, cl.y, cl.x)
 
 	return _err_lines.is_empty()
 
@@ -164,7 +163,7 @@ func _update_cache() -> void:
 	var doc_comment_color := _get_color("text_editor/theme/highlighting/doc_comment_color")
 	_highlighter.add_color_region("##", "", doc_comment_color)
 
-	_highlighter.add_keyword_color("NOTE", Color.GREEN_YELLOW)
+	#_highlighter.add_keyword_color("NOTE", Color.GREEN_YELLOW)
 
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:
