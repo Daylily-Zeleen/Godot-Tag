@@ -34,9 +34,11 @@ func _setup_syntax_check() -> void:
 	for p in te.get_property_list():
 		if p.usage & PROPERTY_USAGE_STORAGE and p.name != "script":
 			prop_list[p.name] = te.get(p.name)
+
 	te.set_script(CustomCodeEdit)
 	for p in prop_list:
 		te.set(p, prop_list[p])
+	te.tag_saved_version()
 
 	var timer := Timer.new()
 	timer.wait_time = 0.25
@@ -58,9 +60,10 @@ func _setup_syntax_check() -> void:
 	te.text_changed.connect(timer.start)
 	te.symbol_hovered.connect(_on_symbol_hovered)
 
+	## HACK
 	te.set_tooltip_request_func.call_deferred(_request_symbol_tooltip)
-
 	te.syntax_highlighter = _highlighter
+	te.set_deferred(&"syntax_highlighter", self)
 
 
 func _on_symbol_hovered(symbol: String, line: int, column: int) -> void:
@@ -162,8 +165,6 @@ func _update_cache() -> void:
 
 	var doc_comment_color := _get_color("text_editor/theme/highlighting/doc_comment_color")
 	_highlighter.add_color_region("##", "", doc_comment_color)
-
-	#_highlighter.add_keyword_color("NOTE", Color.GREEN_YELLOW)
 
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:
