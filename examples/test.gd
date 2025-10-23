@@ -2,4 +2,5 @@
 extends EditorScript
 
 func _run() -> void:
-	return
+	print(DTagDef.MainDomain.Tag1)
+	print(DTagDef.MainDomain.Domain.Tag2)

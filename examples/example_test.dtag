@@ -1,11 +1,12 @@
 # Use "@" as prefix of tag domain.
 # Use indent to define level.
-# Use "->" to redirect a tag to a spcific StringName.
-# Use "#" to define comment of specific item (tag or tag domain).
+# Use "->" to redirect a tag to a specific StringName.
+# Use "#" to normal comment.
+# Use "##" to define comment of specific item (tag or tag domain).
 # Tag and tag domain should be a valid identifier.
 # Tag should be defined before sub-domain.
 #
-# Syntex: Content of "[]" are optional.
+# Syntax: Content of "[]" are optional.
 # [@]DomainOrTag [-> Redirect.To.New.DomainOrTag] [# Any comment of this domain or Tag]
 #
 # Example:
@@ -13,7 +14,7 @@
 # 	Tag ## "Domain.Tag", tag should be defined before sub-domain.
 # 	@SubDomain -> NewDomain ## This sub-domain will be redirected to "NewDomain", its tag will be redirected automatically.
 # 		SubTag1 ## This tag will be redirected to "NewDomain.SubTag1" automatically.
-# 		SubTag2 -> NewDomain.Tag ## This tag will be redirected to "NewDomain.Tag" manully.
+# 		SubTag2 -> NewDomain.Tag ## This tag will be redirected to "NewDomain.Tag" manually.
 
 @MainDomain ## Desc 
 	Tag1 -> Redirect.To.New.Tag ## Desc
