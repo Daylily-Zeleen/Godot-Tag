@@ -101,7 +101,7 @@ static func _parse_line(line: String) -> Array:
 	var comment := ""
 	var comment_idx := line.find("#")
 	if comment_idx >= 0 and line.length() >= comment_idx + 2 and line[comment_idx + 1] == "#":
-		comment = line.substr(comment_idx + 1)
+		comment = line.substr(comment_idx + 2).trim_prefix(" ")
 		line = line.substr(0, comment_idx)
 
 	var redirect := ""
