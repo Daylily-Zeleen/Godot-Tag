@@ -4,9 +4,10 @@ const Parser := preload("../editor/parser.gd")
 const DomainDef := Parser.DomainDef
 const TagDef := Parser.TagDef
 
+const DOMAIN_NAME := "DOMAIN_NAME"
 const GEN_FILE := "res://dtag_def.gen.gd"
 
-func generate(parse_result: Dictionary[String, RefCounted]) -> String:
+func generate(parse_result: Dictionary[String, RefCounted], redirect_map: Dictionary[String, String]) -> String:
 	var fa := FileAccess.open(GEN_FILE, FileAccess.WRITE)
 	if not is_instance_valid(fa):
 		printerr("[DTag] Generate \"%s\" failed: %s" % [GEN_FILE, error_string(FileAccess.get_open_error())])
@@ -36,9 +37,22 @@ func generate(parse_result: Dictionary[String, RefCounted]) -> String:
 			if not def.desc.is_empty():
 				text += "## %s\n" % def.desc
 			text += "const %s = {\n" % def.name
-			text += "\tDOMAIN_NAME = &\"%s\",\n" % (def.name if def.redirect.is_empty() else def.redirect)
+			text += "\t%s = &\"%s\",\n" % [DOMAIN_NAME, def.name if def.redirect.is_empty() else def.redirect]
 			text += _generate_text_recursively(def, def.name, identifiers)
 			text += "}\n"
+
+	if not redirect_map.is_empty():
+		text += "\n\nconst _REDIRECT_NAP: Dictionary[StringName, StringName] = {\n"
+		for k in redirect_map:
+			var redirected := redirect_map[k]
+			while redirect_map.has(redirected):
+				var next := redirect_map[redirected]
+				if next == k:
+					printerr("[DTag] Cycle redirect %s." % k)
+					break
+				redirected = next
+			text += '\t&"%s" : &"%s",\n' % [k, redirect_map[k]]
+		text += "}\n"
 
 	fa.store_string(text)
 	fa.close()
@@ -55,7 +69,7 @@ func generate(parse_result: Dictionary[String, RefCounted]) -> String:
 					te.tag_saved_version()
 			break
 
-	print("DTag: \"%s\" is generated." % [GEN_FILE])
+	print("[DTag]: \"%s\" is generated." % [GEN_FILE])
 	return GEN_FILE
 
 
@@ -73,7 +87,7 @@ static func _generate_text_recursively(def: DomainDef, prev_tag: String, r_ident
 		if not domain.desc.is_empty():
 			ret += "\t## %s\n" % domain.desc
 		ret += "\t%s = {\n" %domain.name
-		ret += "\t\tDOMAIN_NAME = &\"%s\",\n" % tag_text
+		ret += "\t\t%s = &\"%s\",\n" % [DOMAIN_NAME, tag_text]
 		ret += _generate_text_recursively(domain, tag_text, r_identifiers, depth + 1)
 		ret += "\t},\n"
 
