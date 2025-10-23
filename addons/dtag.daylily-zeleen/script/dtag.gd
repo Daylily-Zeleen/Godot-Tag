@@ -9,7 +9,7 @@ extends Resource
 		domain = v
 		if Engine.is_editor_hint() and not value.is_empty():
 			if not is_domain_compatible(value):
-				print_rich("[color=yellow][WARN] DTag: \"%s\" tag is incompatible with domain \"%s\", will be reset to &\"\".[/color]" % [value, ".".join(domain)])
+				print_rich("[color=yellow][DTag]: \"%s\" tag is incompatible with domain \"%s\", will be reset to &\"\".[/color]" % [value, ".".join(domain)])
 				value = &""
 		notify_property_list_changed()
 ## Tag actual value.
@@ -55,6 +55,7 @@ func _set(property: StringName, p_value: Variant) -> bool:
 					for i in range(mini(domain.size(), splits.size())):
 						if domain[i] != splits[i]:
 							valid = false
+							printerr('Set property "tag" failed, new tag ”%s“ is incompatible with required domain "%s". If it is expect, please clear "domain" first.' % [p_value, ".".join(domain)])
 							break
 
 					if valid:
@@ -134,3 +135,14 @@ static func as_domain(p_domain: StringName) -> DTag:
 		ret.domain = p_domain.split(".", false)
 		_domain_cache[p_domain] = ret
 		return ret
+
+
+static var _dtag_def: GDScript:
+	get:
+		if not is_instance_valid(_dtag_def):
+			_dtag_def = ResourceLoader.load("res://dtag_def.gen.gd", "GDScript", ResourceLoader.CACHE_MODE_REUSE)
+		assert(is_instance_valid(_dtag_def))
+		return _dtag_def
+# Redirect tag.
+static func redirect(ori_tag: StringName) -> StringName:
+	return _dtag_def[&"_REDIRECT_NAP"].get(ori_tag, ori_tag)
