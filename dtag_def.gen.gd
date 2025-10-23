@@ -20,4 +20,7 @@ const MainDomain = {
 
 const _REDIRECT_NAP: Dictionary[StringName, StringName] = {
 	&"MainDomain.Tag1" : &"Redirect.To.New.Tag",
+	&"MainDomain.Domain" : &"Redirect.To.New.Domain",
+	&"MainDomain.Domain.Tag2" : &"Redirect.To.New.Domain.Tag2",
+	&"MainDomain.Domain.Tag3" : &"Redirect.To.New.Domain.Tag3",
 }

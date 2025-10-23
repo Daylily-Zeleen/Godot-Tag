@@ -1,7 +1,7 @@
 @tool
 extends ConfirmationDialog
 
-signal selected(tag_or_domain :StringName, confirm: bool)
+signal selected(tag_or_domain: StringName, confirm: bool)
 
 const CACHE_FILE := "res://.godot/editor/dtag_cache.cfg"
 
@@ -23,10 +23,10 @@ var _domain_limitation: StringName:
 		_domain_limitation_label.text = _domain_limitation
 		_domain_limitation_label.tooltip_text = _domain_limitation
 		_domain_limitation_label.get_parent().visible = not v.is_empty()
-var _select_tag:bool
+var _select_tag: bool
 
-var _leaves_item:Array[TreeItem]
-var _cache_cfg:ConfigFile
+var _leaves_item: Array[TreeItem]
+var _cache_cfg: ConfigFile
 
 func _ready() -> void:
 	hide()
@@ -58,7 +58,7 @@ func setup(tag: StringName, domain: PackedStringArray, select_tag: bool) -> void
 	root.set_tooltip_text(0, "")
 
 	const DEF_CLASS := &"DTagDef"
-	var def_class_path :String = ""
+	var def_class_path: String = ""
 	for class_info in ProjectSettings.get_global_class_list():
 		if class_info.class == DEF_CLASS:
 			def_class_path = class_info.path
@@ -73,7 +73,7 @@ func setup(tag: StringName, domain: PackedStringArray, select_tag: bool) -> void
 			if k == &"_REDIRECT_NAP":
 				continue
 
-			var def :Variant = const_map[k]
+			var def: Variant = const_map[k]
 			if not def is Dictionary:
 				continue
 
@@ -111,13 +111,12 @@ func _get_cache_desc(tag_text: String, default: String) -> String:
 	return ret
 
 
-func _get_cache_redirect(tag_text: String, default:String) -> String:
-	assert(is_instance_valid(_cache_cfg))
-	var ret := _cache_cfg.get_value(tag_text, "redirect", "") as String
-	if ret.is_empty():
+func _get_cache_redirect(tag_text: String, default: String) -> String:
+	var redirected := DTag.redirect(tag_text)
+	if tag_text == redirected:
 		return default
-	return ret
-	
+	return redirected
+
 
 func _setup_item_recursively(parent: TreeItem, def: Dictionary) -> void:
 	var prev_domain := parent.get_metadata(0) as String
@@ -125,7 +124,7 @@ func _setup_item_recursively(parent: TreeItem, def: Dictionary) -> void:
 		if k == &"DOMAIN_NAME":
 			continue
 
-		var next_def :Variant = def[k]
+		var next_def: Variant = def[k]
 		var tag := prev_domain + "." + k
 
 		var item := parent.create_child()

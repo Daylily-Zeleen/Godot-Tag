@@ -30,8 +30,8 @@ class EditorInspectorPluginTag extends EditorInspectorPlugin:
 				return true
 		return false
 
-var _selector :Window
-var _inspector_plugin : EditorInspectorPluginTag
+var _selector: Window
+var _inspector_plugin: EditorInspectorPluginTag
 var _highlighter := preload("editor/dtag_syntax_highlighter.gd").new()
 
 const ESETTING_TEXTFILE_EXTENDSIONS := "docks/filesystem/textfile_extensions"
@@ -63,7 +63,7 @@ func _enter_tree() -> void:
 		if e.strip_edges() == "dtag":
 			valid = true
 			break
-	if not valid :
+	if not valid:
 		extensions += ",dtag"
 	ProjectSettings.set_setting(OVERRIDE_SETTING_TEXTFILE_EXTENDSIONS, extensions)
 	
@@ -77,6 +77,7 @@ func _enter_tree() -> void:
 
 	EditorInterface.get_script_editor().register_syntax_highlighter(_highlighter)
 
+
 func _exit_tree() -> void:
 	remove_inspector_plugin(_inspector_plugin)
 
@@ -88,7 +89,7 @@ func _exit_tree() -> void:
 func _on_generate_dtag_def_gen_requested() -> void:
 	var code_generators := ProjectSettings.get_setting(SETTINGS_CODE_GENERATOR) as PackedStringArray
 
-	var generators :Array[Object]
+	var generators: Array[Object]
 	for fp in code_generators:
 		if not FileAccess.file_exists(fp):
 			continue
@@ -115,7 +116,7 @@ func _on_generate_dtag_def_gen_requested() -> void:
 			continue
 
 	var tool := preload("tool/tool_generate_dtag_def.gd").new() as EditorScript
-	tool.generate(tool.get_dtag_recursively(),generators)
+	tool.generate(tool.get_dtag_recursively(), generators)
 
 	for g in generators:
 		if g is RefCounted:

@@ -36,7 +36,7 @@ static func get_dtag_recursively(base_dir := "res://", r_files: PackedStringArra
 
 
 static func generate(files: PackedStringArray, generaters: Array[Object]) -> void:
-	var validated :PackedStringArray
+	var validated: PackedStringArray
 	for f in files:
 		if f.get_extension().to_lower() != "dtag":
 			continue
@@ -56,7 +56,7 @@ static func generate(files: PackedStringArray, generaters: Array[Object]) -> voi
 			return
 
 	# Parse and validate identifiers
-	var parse_errors : Dictionary[int, String]
+	var parse_errors: Dictionary[int, String]
 	var parse_results: Dictionary[String, Dictionary]
 	for f in validated:
 		var text := FileAccess.get_file_as_string(f)
@@ -74,7 +74,7 @@ static func generate(files: PackedStringArray, generaters: Array[Object]) -> voi
 		parse_results[f] = result
 
 	# Merge
-	var merge_errors :PackedStringArray
+	var merge_errors: PackedStringArray
 	var merge_result := _merge_parse_results(parse_results, merge_errors)
 	if not merge_errors.is_empty():
 		printerr("[DTag] Generate failed, merge errors: ")
@@ -119,7 +119,7 @@ static func generate(files: PackedStringArray, generaters: Array[Object]) -> voi
 			_fix_redirect_recursively(def, redirect_map, tag_text)
 
 	# Generate
-	var generated :PackedStringArray
+	var generated: PackedStringArray
 	var default_gen := preload("../generater/gen_dtag_def_gdscript.gd").new()
 	generated.push_back(default_gen.generate(merge_result, redirect_map))
 	for g in generaters:
@@ -140,7 +140,7 @@ static func generate(files: PackedStringArray, generaters: Array[Object]) -> voi
 	print("[DTag] Generate completed.")
 
 #region Internal
-static func _fix_redirect_recursively(def: DomainDef, redirect_map: Dictionary[String, String], prev_tag:= "") -> void:
+static func _fix_redirect_recursively(def: DomainDef, redirect_map: Dictionary[String, String], prev_tag := "") -> void:
 	var domain_text := "%s.%s" % [prev_tag, def.name]
 
 	if redirect_map.has(domain_text):
@@ -163,14 +163,14 @@ static func _redirect_domain_recursively(def: DomainDef) -> void:
 				tag.redirect = def.redirect + "." + tag.name
 
 	for domain: DomainDef in def.sub_domain_list.values():
-		# 不自动对为重定向的子 domain 进行重定向
+		# 不自动对未重定向的子 domain 进行重定向
 		_redirect_domain_recursively(domain)
 
 
 static func _merge_parse_results(parse_results: Dictionary[String, Dictionary], r_errors: PackedStringArray) -> Dictionary[String, RefCounted]:
-	var ret :Dictionary[String, RefCounted]
-	var defined_main_identifier:Dictionary[String, String]
-	for file:String in parse_results:
+	var ret: Dictionary[String, RefCounted]
+	var defined_main_identifier: Dictionary[String, String]
+	for file: String in parse_results:
 		var res: Dictionary[String, RefCounted] = parse_results[file]
 		for name in res:
 			var def := res[name]
@@ -184,10 +184,10 @@ static func _merge_parse_results(parse_results: Dictionary[String, Dictionary], 
 	return ret
 
 
-static func _gen_cache(parse_results: Dictionary[String, RefCounted]) -> Dictionary[String,Dictionary]:
+static func _gen_cache(parse_results: Dictionary[String, RefCounted]) -> Dictionary[String, Dictionary]:
 	var cfg := ConfigFile.new()
 
-	var cache_info :Dictionary[String,Dictionary]
+	var cache_info: Dictionary[String, Dictionary]
 	for def in parse_results.values():
 		_get_cache_info_recursively(def, cache_info)
 
@@ -214,6 +214,6 @@ static func _get_cache_info_recursively(def: RefCounted, r_info: Dictionary[Stri
 	if def is DomainDef:
 		for tag in def.tag_list.values():
 			_get_cache_info_recursively(tag, r_info, tag_text)
-		for domain in def.tag_list.values():
+		for domain in def.sub_domain_list.values():
 			_get_cache_info_recursively(domain, r_info, tag_text)
 #endregion Internal

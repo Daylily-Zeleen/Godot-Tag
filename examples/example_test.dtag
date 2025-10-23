@@ -16,7 +16,7 @@
 # 		SubTag1 ## This tag will be redirected to "NewDomain.SubTag1" automatically.
 # 		SubTag2 -> NewDomain.Tag ## This tag will be redirected to "NewDomain.Tag" manually.
 
-@MainDomain ## Desc 
+@MainDomain ## Desc
 	Tag1 -> Redirect.To.New.Tag ## Desc
 	@Domain -> Redirect.To.New.Domain ## Desc
 		Tag2 ## Desc
