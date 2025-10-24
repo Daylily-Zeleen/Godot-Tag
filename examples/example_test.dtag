@@ -7,7 +7,7 @@
 # Tag should be defined before sub-domain.
 #
 # Syntax: Content of "[]" are optional.
-# [@]DomainOrTag [-> Redirect.To.New.DomainOrTag] [# Any comment of this domain or Tag]
+# [@]DomainOrTag [-> Redirect.To.New.DomainOrTag] [## Any comment of this domain or Tag]
 #
 # Example:
 # @MainDomain ## Description of main Domain.
@@ -16,8 +16,21 @@
 # 		SubTag1 ## This tag will be redirected to "NewDomain.SubTag1" automatically.
 # 		SubTag2 -> NewDomain.Tag ## This tag will be redirected to "NewDomain.Tag" manually.
 
+TagWithoutDomain ## Tag without domain
+TagWithoutDomain1 ## Tag without domain1
+
+
 @MainDomain ## Desc
-	Tag1 -> Redirect.To.New.Tag ## Desc
-	@Domain -> Redirect.To.New.Domain ## Desc
-		Tag2 ## Desc
-		Tag3 ## Desc
+	Tag1 -> RedirectTo.New.Tag ## Desc
+	@Domain -> RedirectTo.New.Domain ## Desc
+		Tag2 ## Will be auto redirect to "RedirectTo.New.Domain.Tag2"
+		Tag3 ## Will be auto redirect to "RedirectTo.New.Domain.Tag3"
+
+
+@RedirectTo ## Sample redirect domain.
+	@New
+		Tag
+		@Domain
+			Tag1
+			Tag2
+			Tag3
