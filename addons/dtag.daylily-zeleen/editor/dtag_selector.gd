@@ -80,6 +80,8 @@ func setup(tag: StringName, domain: PackedStringArray, select_tag: bool) -> void
 			var redirect := _get_cache_redirect(k, "")
 
 			var item := root.create_child()
+			item.set_auto_translate_mode(0, Node.AUTO_TRANSLATE_MODE_DISABLED)
+			item.set_auto_translate_mode(1, Node.AUTO_TRANSLATE_MODE_DISABLED)
 			item.set_text(0, k)
 			item.set_metadata(0, _get_cache_redirect(k, k))
 			item.set_tooltip_text(0, _get_cache_desc(k, k))
@@ -128,6 +130,8 @@ func _setup_item_recursively(parent: TreeItem, def: Dictionary) -> void:
 		var tag := prev_domain + "." + k
 
 		var item := parent.create_child()
+		item.set_auto_translate_mode(0, Node.AUTO_TRANSLATE_MODE_DISABLED)
+		item.set_auto_translate_mode(1, Node.AUTO_TRANSLATE_MODE_DISABLED)
 		item.set_text(0, k)
 		item.set_metadata(0, tag)
 		item.set_tooltip_text(0, _get_cache_desc(tag, tag))
