@@ -1,11 +1,9 @@
 @tool
-extends EditorSyntaxHighlighter
+extends "editor_code_highlighter.gd"
 
-var _highlighter := CodeHighlighter.new()
-
-var _hovering_symbol :String
+var _hovering_symbol: String
 var _hovering_symbol_tooltip: String
-var _err_lines :Dictionary[int, String]
+var _err_lines: Dictionary[int, String]
 
 const _Parse := preload("parser.gd")
 
@@ -60,11 +58,8 @@ func _setup_syntax_check() -> void:
 	te.text_changed.connect(timer.start)
 	te.symbol_hovered.connect(_on_symbol_hovered)
 
-	## HACK
+	### HACK
 	te.set_tooltip_request_func.call_deferred(_request_symbol_tooltip)
-	te.syntax_highlighter = _highlighter
-	te.set_deferred(&"syntax_highlighter", self)
-
 
 func _on_symbol_hovered(symbol: String, line: int, column: int) -> void:
 	_hovering_symbol = symbol
@@ -83,7 +78,7 @@ func _on_symbol_hovered(symbol: String, line: int, column: int) -> void:
 	var line_text := te.get_line(line)
 
 	var comment_column := line_text.find("#")
-	if comment_column>=0 and column >= comment_column:
+	if comment_column >= 0 and column >= comment_column:
 		return
 
 	var redirect_column := line_text.find("->")
@@ -117,7 +112,7 @@ func _get_indent_count(text: String) -> int:
 func _check_syntax() -> void:
 	var te := get_text_edit()
 
-	var err_lines :Dictionary[int, String] = _Parse.parse_format_errors(te.text, 10)
+	var err_lines: Dictionary[int, String] = _Parse.parse_format_errors(te.text, 10)
 	if err_lines.is_empty():
 		_Parse.parse(te.text, err_lines)
 
@@ -148,27 +143,24 @@ func _check_syntax() -> void:
 
 
 func _update_cache() -> void:
+	super ()
 	_setup_syntax_check()
 	_check_syntax()
 
-	_highlighter.clear_keyword_colors()
-	_highlighter.clear_member_keyword_colors()
-	_highlighter.clear_color_regions()
+	clear_keyword_colors()
+	clear_member_keyword_colors()
+	clear_color_regions()
 
-	_highlighter.number_color = _get_color("text_editor/theme/highlighting/text_color")
-	_highlighter.member_variable_color = _get_color("text_editor/theme/highlighting/text_color")
-	_highlighter.function_color = _get_color("text_editor/theme/highlighting/text_color")
-	_highlighter.symbol_color = _get_color("text_editor/theme/highlighting/symbol_color")
+	number_color = _get_color("text_editor/theme/highlighting/text_color")
+	member_color = _get_color("text_editor/theme/highlighting/text_color")
+	function_color = _get_color("text_editor/theme/highlighting/text_color")
+	symbol_color = _get_color("text_editor/theme/highlighting/symbol_color")
 
 	var comment_color := _get_color("text_editor/theme/highlighting/comment_color")
-	_highlighter.add_color_region("#", "", comment_color)
+	add_color_region("#", "", comment_color, true)
 
 	var doc_comment_color := _get_color("text_editor/theme/highlighting/doc_comment_color")
-	_highlighter.add_color_region("##", "", doc_comment_color)
-
-
-func _get_line_syntax_highlighting(line: int) -> Dictionary:
-	return _highlighter.get_line_syntax_highlighting(line)
+	add_color_region("##", "", doc_comment_color, true)
 
 
 func _create() -> EditorSyntaxHighlighter:
