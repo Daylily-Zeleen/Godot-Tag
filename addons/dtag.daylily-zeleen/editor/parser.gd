@@ -17,7 +17,7 @@ static func parse(text: String, r_err_info: Dictionary[int, String] = {}) -> Dic
 	var curr_indent := 0
 	var curr_domain :DomainDef
 
-	var lines := Array(text.split("\n", false))
+	var lines := Array(text.split("\n", true))
 
 	for i in range(lines.size()):
 		var line := lines[i] as String
@@ -67,8 +67,10 @@ static func parse(text: String, r_err_info: Dictionary[int, String] = {}) -> Dic
 				while dedent_count > 0:
 					dedent_count -= 1
 					parent = parent.parent_domain
-				assert(parent)
+				assert(parent or indent_count == 0, "indent: %s" %indent_count)
 				domain.parent_domain = parent
+				if not domain.parent_domain:
+					ret[domain.name] = domain
 
 			curr_indent = indent_count
 			curr_domain = domain
@@ -156,26 +158,28 @@ static func parse_format_errors(text: String, limit := -1) -> Dictionary[int, St
 		var redirect := splits[1] if splits.size() == 2 else ""
 
 		if identifier.begins_with("@"):
-			for idx in range(line - 1, -1, -1):
-				var prev := lines[idx]
-				var stripped := prev.strip_edges()
-				if stripped.is_empty():
-					continue
-				if stripped.begins_with("#"):
-					continue
-				var prev_indent_count := _get_indent_count(prev)
-				if stripped.begins_with("@"):
-					if indent_count - prev_indent_count in [0, 1]:
-						break
+			if indent_count > 0:
+				for idx in range(line - 1, -1, -1):
+					var prev := lines[idx]
+					var stripped := prev.strip_edges()
+					if stripped.is_empty():
+						continue
+					if stripped.begins_with("#"):
+						continue
+					var prev_indent_count := _get_indent_count(prev)
+
+					if stripped.begins_with("@"):
+						if indent_count - prev_indent_count in [0, 1]:
+							break
+						else:
+							err_lines[line] = "ERROR: Error indent level."
+							break
 					else:
-						err_lines[line] = "ERROR: Error indent level."
-						break
-				else:
-					if indent_count == prev_indent_count:
-						break
-					else:
-						err_lines[line] = "ERROR: Error indent level."
-						break
+						if indent_count == prev_indent_count:
+							break
+						else:
+							err_lines[line] = "ERROR: Error indent level."
+							break
 
 			identifier = identifier.substr(1)
 		elif indent_count > 0:

@@ -286,7 +286,7 @@ func _get_line_syntax_highlighting(p_line: int) -> Dictionary:
 			while k < line_length && (str[k] == '\t' || str[k] == ' '):
 				k += 1
 
-			if str[k] == '(':
+			if k < str.length() and str[k] == '(':
 				in_function_name = true
 
 		if !in_function_name && !in_member_variable && !in_keyword && !is_number && in_word:
