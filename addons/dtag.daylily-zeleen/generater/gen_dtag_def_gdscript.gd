@@ -21,13 +21,13 @@ func generate(parse_result: Dictionary[String, RefCounted], redirect_map: Dictio
 		if def is TagDef:
 			text += "\n"
 			if not def.desc.is_empty():
-				text += "## " + def.desc
-			text += "const %s = %s" % [def.name, def.redirect if not def.redirect.is_empty() else def.name]
-			text += "\n"
+				text += "## %s\n" % def.desc
+			text += "const %s = &\"%s\"\n" % [def.name, def.redirect if not def.redirect.is_empty() else def.name]
 
 			if not identifiers.has(def.name):
 				identifiers.push_back(def.name)
 
+	text += "\n"
 	for def in parse_result.values():
 		if def is DomainDef:
 			if not identifiers.has(def.name):
@@ -42,7 +42,8 @@ func generate(parse_result: Dictionary[String, RefCounted], redirect_map: Dictio
 			text += "}\n"
 
 	if not redirect_map.is_empty():
-		text += "\n\nconst _REDIRECT_NAP: Dictionary[StringName, StringName] = {\n"
+		text += "\n\n# ===== Redirect map. =====\n"
+		text += "const _REDIRECT_NAP: Dictionary[StringName, StringName] = {\n"
 		for k in redirect_map:
 			var redirected := redirect_map[k]
 			while redirect_map.has(redirected):
